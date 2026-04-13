@@ -1,494 +1,210 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mestre Visual — Gerador de Materiais Educacionais</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#f7f5f0;--panel:#ffffff;--accent:#1a9e8f;--accent2:#f4a825;--accent3:#e85d4a;
-  --dark:#1a1a2e;--mid:#4a4a6a;--light:#9898b0;--border:#e8e4dc;
-  --shadow:0 4px 24px rgba(26,30,60,0.08);--radius:16px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
-header{background:var(--dark);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-text{font-family:'DM Serif Display',serif;font-size:20px;color:#fff}.logo-text span{color:var(--accent2)}
-nav{display:flex;gap:8px}
-nav a{color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;font-weight:500;padding:6px 14px;border-radius:8px;transition:all .2s}
-nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
-nav a.active{color:#fff;background:rgba(26,158,143,.3);border:1px solid rgba(26,158,143,.4)}
-.main-layout{display:grid;grid-template-columns:400px 1fr;min-height:calc(100vh - 64px);position:relative;z-index:1}
-.left-panel{background:var(--panel);border-right:1px solid var(--border);padding:28px 24px;overflow-y:auto;height:calc(100vh - 64px);position:sticky;top:64px}
-.panel-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(26,158,143,.1);color:var(--accent);border:1px solid rgba(26,158,143,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
-.panel-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--dark);line-height:1.2;margin-bottom:5px}
-.panel-subtitle{font-size:12.5px;color:var(--light);line-height:1.5;margin-bottom:18px}
-.divider{height:1px;background:var(--border);margin:18px 0}
-.tab-switcher{display:flex;gap:5px;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:20px;border:1px solid var(--border)}
-.tab-btn{flex:1;padding:8px 10px;border:none;border-radius:7px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:var(--light)}
-.tab-btn.active{background:var(--panel);color:var(--dark);box-shadow:0 1px 6px rgba(0,0,0,.08)}
-.tab-content{display:none}.tab-content.active{display:block}
-.form-group{margin-bottom:15px}
-.form-label{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--mid);margin-bottom:7px}
-.form-label .icon{width:20px;height:20px;background:var(--bg);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px}
-.optional-badge{font-size:10px;font-weight:500;color:var(--light);background:var(--bg);border-radius:4px;padding:2px 7px}
-.form-input,.form-select,.form-textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--dark);background:#fdfcfa;transition:all .2s;outline:none}
-.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239898b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;appearance:none;cursor:pointer}
-.form-textarea{resize:vertical;min-height:85px;line-height:1.6}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(26,158,143,.1)}
-.form-input::placeholder,.form-textarea::placeholder{color:#bbb}
-.btn-generate{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#0d8a7c);color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(26,158,143,.35)}
-.btn-generate:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,158,143,.45)}
-.btn-generate.loading{opacity:.8;pointer-events:none}
-.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
-.btn-generate.loading .spin,.btn-capa.loading .spin{display:block}
-.btn-generate.loading .btext,.btn-capa.loading .btext{display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.timer-tag{font-size:11px;color:var(--light);text-align:center;margin-top:7px}
-.btn-capa{width:100%;padding:14px;background:linear-gradient(135deg,#f4a825,#e07c00);color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(244,168,37,.4)}
-.btn-capa:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(244,168,37,.5)}
-.btn-capa.loading{opacity:.8;pointer-events:none}
-.right-panel{padding:28px 32px;overflow-y:auto}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;text-align:center;gap:14px}
-.empty-icon{width:72px;height:72px;background:linear-gradient(135deg,rgba(26,158,143,.1),rgba(244,168,37,.1));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.empty-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--mid)}
-.empty-sub{font-size:12.5px;color:var(--light);max-width:280px;line-height:1.6}
-.infog-loading{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:16px}
-.infog-loading.show{display:flex}
-.infog-spinner{width:48px;height:48px;border:4px solid rgba(26,158,143,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-.infog-loading p{font-size:13px;color:var(--light)}
-.infog-result{display:none;animation:fadeUp .5s ease}
-.infog-result.show{display:block}
-.infog-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
-.infog-toolbar h2{font-family:'DM Serif Display',serif;font-size:20px;color:var(--dark)}
-.infog-actions{display:flex;gap:8px}
-.btn-action{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--mid);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
-.btn-action:hover{border-color:var(--accent);color:var(--accent)}
-.btn-action.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn-action.primary:hover{background:#0d8a7c}
-#infogFrame{background:#fff;border-radius:16px;border:2px solid var(--border);box-shadow:0 8px 40px rgba(0,0,0,.12);overflow:hidden;width:100%}
-/* CAPA */
-.cover-preview-wrap{display:flex;justify-content:center;margin-bottom:18px}
-.cover-preview{width:200px;aspect-ratio:3/4;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;background:#fff;border:2px solid var(--border);transition:transform .3s}
-.cover-preview:hover{transform:scale(1.02) rotate(-0.5deg)}
-.cover-bg-grid{position:absolute;inset:0;background-color:#fff;background-image:linear-gradient(rgba(160,180,220,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(160,180,220,.18) 1px,transparent 1px);background-size:14px 14px}
-.cover-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 10px 12px}
-.cover-top-text{font-size:13px;font-weight:700;color:#222;font-family:'DM Serif Display',serif;font-style:italic;text-align:center}
-.cover-icons-area{flex:1;width:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;padding:6px 4px;font-size:22px;line-height:1.3}
-.cover-main-title{font-size:26px;font-weight:900;text-align:center;background:linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));text-transform:uppercase}
-.cover-bottom-text{font-size:9px;font-style:italic;color:#444;text-align:center;font-family:'DM Serif Display',serif;line-height:1.3;padding-top:4px;border-top:1px dashed rgba(0,0,0,.12);width:100%}
-.summary-card{background:#fdfcfa;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:18px}
-.summary-card h4{font-size:13px;font-weight:700;color:var(--mid);margin-bottom:10px}
-.summary-row{display:flex;gap:8px;margin-bottom:6px;font-size:12.5px}
-.s-label{color:var(--light);min-width:110px}.s-val{color:var(--dark);font-weight:600}
-.capa-prompt-box{background:var(--dark);border-radius:12px;padding:18px;margin-bottom:14px}
-.capa-prompt-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.capa-prompt-heading span{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px}
-.capa-prompt-text{font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.75;white-space:pre-wrap}
-.btn-copy{padding:8px 16px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-copy:hover{background:rgba(255,255,255,.18)}
-.btn-copy.copied{background:rgba(26,158,143,.3);border-color:var(--accent);color:#4dd9cb}
-.capa-result{display:none;animation:fadeUp .4s ease}
-.capa-result.visible{display:block}
-.capaEmptyState{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;text-align:center;gap:12px}
-@media(max-width:900px){.main-layout{grid-template-columns:1fr}.left-panel{position:static;height:auto}.right-panel{padding:20px 16px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Prompt Educacional</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            gap: 6px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            color: #333;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            border-color: #a0c4ff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #1a4971;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            display: none;
+        }
+
+        .result-container h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: #475569;
+        }
+
+        #prompt-output {
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+        
+        .copy-btn {
+            background-color: #cbd5e1;
+            color: #333;
+            margin-top: 15px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #94a3b8;
+        }
+    </style>
 </head>
 <body>
 
-<header>
-  <a href="#" class="logo">
-    <div class="logo-icon">🎨</div>
-    <span class="logo-text">Mestre <span>Visual</span></span>
-  </a>
-  <nav>
-    <a href="#" class="active">Gerador</a>
-    <a href="#">Galeria</a>
-    <a href="#">Tutoriais</a>
-  </nav>
-</header>
-
-<div class="main-layout">
-  <div class="left-panel">
-    <div class="panel-badge">✦ Gerador de Materiais</div>
-    <h1 class="panel-title">Crie materiais educacionais incríveis</h1>
-    <p class="panel-subtitle">Infográficos visuais prontos e prompts de capa de apostila.</p>
-    
-    <div class="form-group" style="margin-bottom: 20px; background: rgba(26,158,143,.1); padding: 15px; border-radius: 12px; border: 1px dashed var(--accent);">
-      <label class="form-label"><span class="icon">🔑</span>Chave da API (Gemini Gratuita)</label>
-      <input type="password" class="form-input" id="apiKey" placeholder="Cole sua chave gerada no Google AI Studio..." />
-      <p style="font-size:11px;color:var(--mid);margin-top:5px">Sua chave é usada apenas localmente no seu navegador.</p>
+<div class="container">
+    <div class="header">
+        <h2>📚 Entrada</h2>
+        <span>Leva menos de 1 min</span>
     </div>
 
-    <div class="divider"></div>
-
-    <div class="tab-switcher">
-      <button class="tab-btn active" onclick="switchTab('infografico',this)">🗂 Infográfico</button>
-      <button class="tab-btn" onclick="switchTab('capa',this)">📘 Capa de Apostila</button>
+    <div class="form-group">
+        <label>📖 Disciplina</label>
+        <input type="text" id="disciplina" value="Matemática" placeholder="Ex: Matemática, Biologia...">
     </div>
 
-    <div class="tab-content active" id="tab-infografico">
-      <div class="form-group">
-        <label class="form-label"><span class="icon">📚</span>Disciplina</label>
-        <input class="form-input" id="disciplina" placeholder="Ex: Matemática, Biologia, Português..." />
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span class="icon">✨</span>Assunto / Tema</label>
-        <input class="form-input" id="assunto" placeholder="Ex: Volume da Esfera, Fotossíntese..." />
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span class="icon">👥</span>Público-alvo</label>
-        <select class="form-select" id="publico">
-          <option value="">Selecione o público</option>
-          <option value="Ensino fundamental I">Ensino fundamental I (6–10 anos)</option>
-          <option value="Ensino fundamental II">Ensino fundamental II (11–14 anos)</option>
-          <option value="Ensino médio">Ensino médio (15–17 anos)</option>
-          <option value="Ensino superior">Ensino superior</option>
-          <option value="Concursos">Concursos e vestibulares</option>
+    <div class="form-group">
+        <label>✨ Assunto</label>
+        <input type="text" id="assunto" value="Progressão Aritmética (P.A.)" placeholder="Ex: Genótipo, P.G...">
+    </div>
+
+    <div class="form-group">
+        <label>👥 Público / faixa etária</label>
+        <select id="publico">
+            <option value="Ensino fundamental">Ensino fundamental</option>
+            <option value="Ensino médio" selected>Ensino médio</option>
+            <option value="Ensino superior">Ensino superior</option>
+            <option value="Adultos">Adultos</option>
         </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span class="icon">📝</span>Conteúdo de referência <span class="optional-badge">opcional</span></label>
-        <textarea class="form-textarea" id="referencia" placeholder="Cole aqui conceitos-chave, fórmulas ou exemplos que o infográfico deve cobrir..."></textarea>
-      </div>
-      <button class="btn-generate" id="btnGerar" onclick="gerarInfografico()">
-        <div class="spin"></div>
-        <span class="btext">🚀 Gerar Infográfico</span>
-      </button>
-      <p class="timer-tag">⏱ Leva cerca de 15 segundos</p>
     </div>
 
-    <div class="tab-content" id="tab-capa">
-      <div class="form-group">
-        <label class="form-label"><span class="icon">📚</span>Disciplina</label>
-        <input class="form-input" id="capa-disciplina" placeholder="Ex: Química, Física, Geografia..." oninput="atualizarPreviewCapa()" />
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span class="icon">🏷</span>Texto superior</label>
-        <input class="form-input" id="capa-topo" placeholder="Ex: Fichas Desenhadas, Apostila Visual..." oninput="atualizarPreviewCapa()" />
-        <p style="font-size:11px;color:var(--light);margin-top:5px">Aparece acima do título principal</p>
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span class="icon">💬</span>Frase inferior <span class="optional-badge">opcional</span></label>
-        <input class="form-input" id="capa-frase" placeholder="Ex: As moléculas ganharam vida!" oninput="atualizarPreviewCapa()" />
-        <p style="font-size:11px;color:var(--light);margin-top:5px">Se vazio, será gerada automaticamente</p>
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span class="icon">🎨</span>Estilo visual</label>
-        <select class="form-select" id="capa-estilo">
-          <option value="hand-drawn doodle">Hand-drawn / Doodle</option>
-          <option value="flat design colorido">Flat design colorido</option>
-          <option value="cartoon educacional">Cartoon educacional</option>
-          <option value="minimalista moderno">Minimalista moderno</option>
+    <div class="form-group">
+        <label>🎨 Estilo da ilustração</label>
+        <select id="estilo">
+            <option value="Hand-drawn" selected>Hand-drawn</option>
+            <option value="Disney/Pixar">Disney/Pixar 3D</option>
+            <option value="Minimalista">Minimalista</option>
+            <option value="Realista">Realista</option>
+            <option value="Vetor Flat">Vetor Flat</option>
         </select>
-      </div>
-      <button class="btn-capa" id="btnGerarCapa" onclick="gerarPromptCapa()">
-        <div class="spin"></div>
-        <span class="btext">🎨 Gerar Prompt de Capa</span>
-      </button>
-      <p class="timer-tag">⏱ Rápido e fácil</p>
-    </div>
-  </div>
-
-  <div class="right-panel">
-    <div id="infografico-panel">
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon">🎓</div>
-        <h2 class="empty-title">Pronto para criar?</h2>
-        <p class="empty-sub">Preencha os campos e clique em "Gerar Infográfico" para criar um material visual completo estilo apostila, pronto para imprimir ou compartilhar.</p>
-      </div>
-      <div class="infog-loading" id="infogLoading">
-        <div class="infog-spinner"></div>
-        <p>Gerando seu infográfico educacional com Gemini...</p>
-      </div>
-      <div class="infog-result" id="infogResult">
-        <div class="infog-toolbar">
-          <h2 id="infogTitle">Infográfico</h2>
-          <div class="infog-actions">
-            <button class="btn-action" onclick="gerarInfografico()">🔄 Regenerar</button>
-            <button class="btn-action primary" onclick="baixarInfografico()">⬇️ Baixar HTML</button>
-          </div>
-        </div>
-        <div id="infogFrame"></div>
-      </div>
     </div>
 
-    <div id="capa-panel" style="display:none">
-      <div class="cover-preview-wrap">
-        <div class="cover-preview">
-          <div class="cover-bg-grid"></div>
-          <div class="cover-inner">
-            <div class="cover-top-text" id="prevTopo">Fichas Desenhadas</div>
-            <div class="cover-icons-area" id="prevIcons">📐 🔬 🧬 🌍 📊 ⚗️ 🔭 🧪 📏 🧮 🌱 💡</div>
-            <div class="cover-main-title" id="prevDisciplina">DISCIPLINA</div>
-            <div class="cover-bottom-text" id="prevFrase">Aprenda de forma visual e divertida!</div>
-          </div>
-        </div>
-      </div>
-      <div class="capaEmptyState" id="capaEmptyState">
-        <div class="empty-icon" style="animation-delay:.2s">📘</div>
-        <h2 class="empty-title">Pré-visualização ao vivo</h2>
-        <p class="empty-sub">Preencha os campos e gere o prompt para criar a capa num gerador de imagens como Midjourney, DALL-E ou Gemini Imagens.</p>
-      </div>
-      <div class="capa-result" id="capaResult">
-        <div class="summary-card">
-          <h4>📋 Resumo da Capa</h4>
-          <div class="summary-row"><span class="s-label">Disciplina:</span><span class="s-val" id="sumDisciplina">—</span></div>
-          <div class="summary-row"><span class="s-label">Texto superior:</span><span class="s-val" id="sumTopo">—</span></div>
-          <div class="summary-row"><span class="s-label">Frase inferior:</span><span class="s-val" id="sumFrase">—</span></div>
-          <div class="summary-row"><span class="s-label">Estilo:</span><span class="s-val" id="sumEstilo">—</span></div>
-        </div>
-        <div class="capa-prompt-box">
-          <div class="capa-prompt-heading">
-            <span>🖼 Prompt de Imagem</span>
-            <button class="btn-copy" id="btnCopyCapa" onclick="copiarTexto('capaPromptText','btnCopyCapa')">📋 Copiar</button>
-          </div>
-          <p class="capa-prompt-text" id="capaPromptText"></p>
-        </div>
-      </div>
+    <div class="form-group">
+        <label>Códigos da BNCC (opcional)</label>
+        <input type="text" id="bncc" placeholder="Ex: EM13MAT507">
     </div>
-  </div>
+
+    <div class="form-group">
+        <label>Texto de referência (opcional)</label>
+        <textarea id="textoRef" placeholder="Ex: trecho do material, definição do professor, contexto específico..."></textarea>
+    </div>
+
+    <button onclick="gerarPrompt()">Gerar Prompt</button>
+
+    <div class="result-container" id="result-box">
+        <h3>Prompt Gerado:</h3>
+        <div id="prompt-output"></div>
+        <button class="copy-btn" onclick="copiarPrompt()">Copiar Prompt</button>
+    </div>
 </div>
 
 <script>
-// TAB SWITCHING
-function switchTab(tab,btn){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-infografico').classList.toggle('active',tab==='infografico');
-  document.getElementById('tab-capa').classList.toggle('active',tab==='capa');
-  document.getElementById('infografico-panel').style.display=tab==='infografico'?'':'none';
-  document.getElementById('capa-panel').style.display=tab==='capa'?'':'none';
-}
+    function gerarPrompt() {
+        const disciplina = document.getElementById('disciplina').value.trim() || '[Disciplina]';
+        const assunto = document.getElementById('assunto').value.trim() || '[Assunto]';
+        const publico = document.getElementById('publico').value;
+        const estilo = document.getElementById('estilo').value;
+        const bncc = document.getElementById('bncc').value.trim();
+        const textoRef = document.getElementById('textoRef').value.trim();
 
-// =============================================
-// INFOGRÁFICO GENERATOR (VIA GOOGLE GEMINI)
-// =============================================
-async function gerarInfografico(){
-  const apiKey = document.getElementById('apiKey').value.trim();
-  const btn = document.getElementById('btnGerar');
-  
-  if(!apiKey){
-    alert('Por favor, insira sua chave da API do Gemini no topo da página.');
-    return;
-  }
+        let prompt = `Crie um pôster de infográfico educacional sobre "${assunto}" em ${disciplina}. Estilo educacional brasileiro. Siga RIGOROSAMENTE o estilo de ilustração: ${estilo}. Não use figuras infantis ou imagens de crianças. Se houver personagens, eles devem ser obrigatoriamente da faixa etária de ${publico.toLowerCase()} ou adultos, condizentes com o público alvo. Use elementos visuais que tenham relação direta com o conteúdo, use ilustrações que representem cada conceito de forma clara. Blocos de texto curtos e mínimos, com rótulos em negrito e legíveis. Priorize a explicação visual em vez do texto. Layout limpo e estruturado, com fundo branco. Seções do infográfico com painéis de comparação, balões de fala e palavras-chave destacadas. Se houver personagens, eles devem representar estudantes ou profissionais adequados à faixa etária especificada. Altamente didático, com aparência de material de estudo brasileiro (estilo apostila). Cores vibrantes e harmoniosas. Inclua comparações lado a lado quando fizer sentido. Garanta consistência lógica, sem contradições e sem erros matemáticos ou numéricos nos rótulos ou exemplos. Público-alvo: ${publico}, tom objetivo, focado em compreensão e revisão. Layout mais sofisticado, gráficos limpos e hierarquia forte. Todo o conteúdo textual deve estar rigorosamente em português do Brasil, sem termos em inglês ou outras variações do português.`;
 
-  const disciplina=document.getElementById('disciplina').value.trim();
-  const assunto=document.getElementById('assunto').value.trim();
-  const publico=document.getElementById('publico').value;
-  const referencia=document.getElementById('referencia').value.trim();
-  if(!disciplina||!assunto){alert('Preencha a Disciplina e o Assunto.');return;}
-
-  btn.classList.add('loading');
-  document.getElementById('emptyState').style.display='none';
-  document.getElementById('infogResult').classList.remove('show');
-  document.getElementById('infogLoading').classList.add('show');
-
-  const system=`Você é um designer educacional especialista em criar infográficos HTML visuais para apostilas brasileiras, no estilo dos exemplos: layout colorido com personagem cartoon, seções numeradas, boxes de conteúdo, fórmulas em destaque, exemplos práticos.
-
-REGRAS ABSOLUTAS:
-1. Responda APENAS com HTML — sem markdown, sem blocos de código (não use \`\`\`html), sem texto explicativo. Apenas as tags HTML puras.
-2. Comece com <div class="infog-wrapper"> e termine com </div>. NÃO inclua DOCTYPE, html, head, body.
-3. Use <style> interna no início do div para todos os estilos.
-4. Use a fonte Nunito (já disponível): font-family:'Nunito',sans-serif
-
-DESIGN OBRIGATÓRIO:
-- Cabeçalho colorido com título da disciplina em grande + subtítulo do assunto
-- Fundo branco com bordas arredondadas e sombra suave
-- 4 a 5 seções numeradas com círculo colorido (ex: ① ② ③ ④)
-- Cada seção tem: título em negrito + box colorido com conteúdo
-- PERSONAGEM SVG: estudante ou professor em estilo cartoon simples no cabeçalho ou lateralmente
-- Fórmulas/definições em box com fundo colorido e fonte grande em destaque
-- Exemplos práticos com cálculo passo a passo em box cinza/bege
-- Comparativos lado a lado (flex row) quando fizer sentido
-- Cores vibrantes: use paleta alegre (azul #4d96ff, verde #6bcb77, laranja #ff9f43, roxo #a29bfe, vermelho #ff6b6b)
-- Ícones/emojis relevantes em cada seção
-- Rodapé com dica de ouro ou resumo
-- width:100%; padding:24px; sem altura fixa
-
-CONTEÚDO: Pedagogicamente correto, completo, com exemplos reais e numéricos. TODO em português do Brasil.`;
-
-  const userMsg=`Disciplina: ${disciplina}
-Assunto: ${assunto}
-Público: ${publico||'Ensino médio'}
-${referencia?'Conteúdo de referência:\n'+referencia:''}
-
-Crie o infográfico visual completo no estilo apostila educacional brasileira.`;
-
-  try{
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: system }]
-        },
-        contents: [{
-          parts: [{ text: userMsg }]
-        }],
-        generationConfig: {
-          temperature: 0.7
+        if (bncc) {
+            prompt += `\n\nCertifique-se de que a abordagem visual e textual contemple as habilidades do código da BNCC: ${bncc}.`;
         }
-      })
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Erro na API do Gemini: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data = await response.json();
-    let html = data.candidates[0].content.parts[0].text;
-    
-    // Limpeza extra para garantir que o markdown não quebre o layout
-    html = html.replace(/^```html\n?/g,'').replace(/^```\n?/g,'').replace(/\n?```$/g,'').trim();
-    
-    document.getElementById('infogTitle').textContent=`${disciplina}: ${assunto}`;
-    document.getElementById('infogFrame').innerHTML=html;
-    document.getElementById('infogLoading').classList.remove('show');
-    document.getElementById('infogResult').classList.add('show');
-  }catch(e){
-    console.error(e);
-    alert('Erro: ' + e.message);
-    document.getElementById('infogLoading').classList.remove('show');
-    document.getElementById('emptyState').style.display='';
-  }finally{
-    btn.classList.remove('loading');
-  }
-}
-
-function baixarInfografico(){
-  const content=document.getElementById('infogFrame').innerHTML;
-  const disciplina=document.getElementById('disciplina').value||'infografico';
-  const assunto=document.getElementById('assunto').value||'educacional';
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${disciplina} - ${assunto}</title><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"></head><body style="margin:0;padding:20px;background:#f0f0f0;display:flex;justify-content:center">${content}</body></html>`;
-  const blob=new Blob([html],{type:'text/html'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`infografico-${disciplina.toLowerCase().replace(/\s+/g,'-')}.html`;
-  a.click();
-}
-
-// =============================================
-// CAPA GENERATOR (VIA GOOGLE GEMINI)
-// =============================================
-const ICONS_MAP={
-  quimica:'⚗️ 🧪 🔬 ⚛️ 🧬 💊 🧲 🌡️ 🔥 💧',
-  fisica:'⚡ 🔭 🧲 💡 🌊 📐 📏 ⚖️ 🌡️ 🔋',
-  biologia:'🌱 🧬 🔬 🌿 🦠 🦋 🧫 🌸 💉 🧠',
-  matematica:'📐 📏 🔢 ➕ ✖️ 📊 📈 🎯 💯 ∑',
-  historia:'📜 🏛️ ⚔️ 🗺️ 👑 🏺 📖 🕰️ 🌍 🏰',
-  geografia:'🌍 🗺️ 🏔️ 🌊 🧭 🌋 🏜️ 🌧️ ☀️ 🌿',
-  portugues:'📖 ✍️ 📝 🖊️ 📚 💬 🗣️ 📰 🎭 📜',
-  ingles:'🇬🇧 📖 💬 🌐 ✍️ 🎙️ 📝 🗣️ 📚 🎓',
-  arte:'🎨 🖌️ 🖼️ ✏️ 🎭 🎶 🎸 🎬 📸 🌈',
-  default:'📐 🔬 🧬 🌍 📊 ⚗️ 🔭 🧪 📏 💡'
-};
-function getIcons(d){
-  const k=(d||'').toLowerCase();
-  for(const[key,val]of Object.entries(ICONS_MAP)){if(key!=='default'&&k.includes(key))return val;}
-  return ICONS_MAP.default;
-}
-function atualizarPreviewCapa(){
-  const disc=document.getElementById('capa-disciplina').value.trim();
-  const topo=document.getElementById('capa-topo').value.trim();
-  const frase=document.getElementById('capa-frase').value.trim();
-  document.getElementById('prevDisciplina').textContent=disc?disc.toUpperCase():'DISCIPLINA';
-  document.getElementById('prevTopo').textContent=topo||'Fichas Desenhadas';
-  document.getElementById('prevFrase').textContent=frase||'Aprenda de forma visual e divertida!';
-  document.getElementById('prevIcons').textContent=getIcons(disc);
-}
-
-async function gerarPromptCapa(){
-  const apiKey = document.getElementById('apiKey').value.trim();
-  const btn = document.getElementById('btnGerarCapa');
-
-  if(!apiKey){
-    alert('Por favor, insira sua chave da API do Gemini no topo da página.');
-    return;
-  }
-
-  const disciplina=document.getElementById('capa-disciplina').value.trim();
-  const topo=document.getElementById('capa-topo').value.trim();
-  const frase=document.getElementById('capa-frase').value.trim();
-  const estilo=document.getElementById('capa-estilo').value;
-  
-  if(!disciplina){alert('Informe a Disciplina.');return;}
-  
-  btn.classList.add('loading');
-  document.getElementById('capaEmptyState').style.display='none';
-  document.getElementById('capaResult').classList.remove('visible');
-  
-  const system = `Especialista em capas de apostilas educacionais brasileiras. Retorne os dados estritamente de acordo com a estrutura exigida. O prompt_capa deve descrever em inglês: capa vertical estilo apostila, fundo de papel quadriculado branco, título em letras 3D coloridas infladas com gradiente vibrante, muitos ícones/doodles temáticos ao redor, estudante do ensino médio como personagem, texto superior e inferior conforme dados.`;
-  
-  try{
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: system }]
-        },
-        contents: [{
-          parts: [{ text: `Disciplina:${disciplina}\nTexto superior:${topo||'Apostila Visual'}\nFrase inferior:${frase||'(crie uma frase curta e motivacional)'}\nEstilo:${estilo}` }]
-        }],
-        generationConfig: {
-          temperature: 0.8,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              frase_gerada: { type: "STRING" },
-              prompt_capa: { type: "STRING" }
-            },
-            required: ["frase_gerada", "prompt_capa"]
-          }
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Erro na API: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data = await response.json();
-    const result = JSON.parse(data.candidates[0].content.parts[0].text);
-    
-    const fraseReal = frase || result.frase_gerada || 'Aprenda de forma visual!';
-    document.getElementById('prevFrase').textContent=fraseReal;
-    document.getElementById('sumDisciplina').textContent=disciplina;
-    document.getElementById('sumTopo').textContent=topo||'Apostila Visual';
-    document.getElementById('sumFrase').textContent=fraseReal;
-    document.getElementById('sumEstilo').textContent=estilo;
-    document.getElementById('capaPromptText').textContent=result.prompt_capa;
-    document.getElementById('capaResult').classList.add('visible');
-  }catch(e){
-    console.error(e);
-    alert('Erro ao gerar prompt de capa: ' + e.message);
-  }finally{
-    btn.classList.remove('loading');
-  }
-}
-
-function copiarTexto(id,btnId){
-  const text=document.getElementById(id).textContent;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn=document.getElementById(btnId);const prev=btn.textContent;
-    btn.textContent='✅ Copiado!';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent=prev;btn.classList.remove('copied');},2000);
-  });
-}
-</script>
-</body>
-</html>
+        if (textoRef) {
+            prompt +=
