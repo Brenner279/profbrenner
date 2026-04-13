@@ -1,86 +1,283 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Interação 3D com as Mãos</title>
-    
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-  </head>
-  <body>
-    
-    <video id="input_video" style="display:none;"></video>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mestre Visual — Gerador de Materiais Educacionais</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f5f0;--panel:#ffffff;--accent:#1a9e8f;--accent2:#f4a825;--accent3:#e85d4a;
+  --dark:#1a1a2e;--mid:#4a4a6a;--light:#9898b0;--border:#e8e4dc;
+  --shadow:0 4px 24px rgba(26,30,60,0.08);--radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+header{background:var(--dark);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:'DM Serif Display',serif;font-size:20px;color:#fff}.logo-text span{color:var(--accent2)}
+nav{display:flex;gap:8px}
+nav a{color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;font-weight:500;padding:6px 14px;border-radius:8px;transition:all .2s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+nav a.active{color:#fff;background:rgba(26,158,143,.3);border:1px solid rgba(26,158,143,.4)}
+.main-layout{display:grid;grid-template-columns:400px 1fr;min-height:calc(100vh - 64px);position:relative;z-index:1}
+.left-panel{background:var(--panel);border-right:1px solid var(--border);padding:28px 24px;overflow-y:auto;height:calc(100vh - 64px);position:sticky;top:64px}
+.panel-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(26,158,143,.1);color:var(--accent);border:1px solid rgba(26,158,143,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.panel-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--dark);line-height:1.2;margin-bottom:5px}
+.panel-subtitle{font-size:12.5px;color:var(--light);line-height:1.5;margin-bottom:18px}
+.divider{height:1px;background:var(--border);margin:18px 0}
+.tab-switcher{display:flex;gap:5px;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:20px;border:1px solid var(--border)}
+.tab-btn{flex:1;padding:8px 10px;border:none;border-radius:7px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:var(--light)}
+.tab-btn.active{background:var(--panel);color:var(--dark);box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.tab-content{display:none}.tab-content.active{display:block}
+.form-group{margin-bottom:15px}
+.form-label{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--mid);margin-bottom:7px}
+.form-label .icon{width:20px;height:20px;background:var(--bg);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.optional-badge{font-size:10px;font-weight:500;color:var(--light);background:var(--bg);border-radius:4px;padding:2px 7px}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--dark);background:#fdfcfa;transition:all .2s;outline:none}
+.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239898b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;appearance:none;cursor:pointer}
+.form-textarea{resize:vertical;min-height:85px;line-height:1.6}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(26,158,143,.1)}
+.form-input::placeholder,.form-textarea::placeholder{color:#bbb}
+.btn-generate{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#0d8a7c);color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(26,158,143,.35)}
+.btn-generate:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,158,143,.45)}
+.btn-generate.loading{opacity:.8;pointer-events:none}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn-generate.loading .spin,.btn-capa.loading .spin{display:block}
+.btn-generate.loading .btext,.btn-capa.loading .btext{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.timer-tag{font-size:11px;color:var(--light);text-align:center;margin-top:7px}
+.btn-capa{width:100%;padding:14px;background:linear-gradient(135deg,#f4a825,#e07c00);color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(244,168,37,.4)}
+.btn-capa:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(244,168,37,.5)}
+.btn-capa.loading{opacity:.8;pointer-events:none}
+.right-panel{padding:28px 32px;overflow-y:auto}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;text-align:center;gap:14px}
+.empty-icon{width:72px;height:72px;background:linear-gradient(135deg,rgba(26,158,143,.1),rgba(244,168,37,.1));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.empty-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--mid)}
+.empty-sub{font-size:12.5px;color:var(--light);max-width:280px;line-height:1.6}
+.infog-loading{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:16px}
+.infog-loading.show{display:flex}
+.infog-spinner{width:48px;height:48px;border:4px solid rgba(26,158,143,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+.infog-loading p{font-size:13px;color:var(--light)}
+.infog-result{display:none;animation:fadeUp .5s ease}
+.infog-result.show{display:block}
+.infog-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.infog-toolbar h2{font-family:'DM Serif Display',serif;font-size:20px;color:var(--dark)}
+.infog-actions{display:flex;gap:8px}
+.btn-action{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--mid);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.btn-action:hover{border-color:var(--accent);color:var(--accent)}
+.btn-action.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-action.primary:hover{background:#0d8a7c}
+#infogFrame{background:#fff;border-radius:16px;border:2px solid var(--border);box-shadow:0 8px 40px rgba(0,0,0,.12);overflow:hidden;width:100%}
+/* CAPA */
+.cover-preview-wrap{display:flex;justify-content:center;margin-bottom:18px}
+.cover-preview{width:200px;aspect-ratio:3/4;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;background:#fff;border:2px solid var(--border);transition:transform .3s}
+.cover-preview:hover{transform:scale(1.02) rotate(-0.5deg)}
+.cover-bg-grid{position:absolute;inset:0;background-color:#fff;background-image:linear-gradient(rgba(160,180,220,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(160,180,220,.18) 1px,transparent 1px);background-size:14px 14px}
+.cover-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 10px 12px}
+.cover-top-text{font-size:13px;font-weight:700;color:#222;font-family:'DM Serif Display',serif;font-style:italic;text-align:center}
+.cover-icons-area{flex:1;width:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;padding:6px 4px;font-size:22px;line-height:1.3}
+.cover-main-title{font-size:26px;font-weight:900;text-align:center;background:linear-gradient(135deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));text-transform:uppercase}
+.cover-bottom-text{font-size:9px;font-style:italic;color:#444;text-align:center;font-family:'DM Serif Display',serif;line-height:1.3;padding-top:4px;border-top:1px dashed rgba(0,0,0,.12);width:100%}
+.summary-card{background:#fdfcfa;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+.summary-card h4{font-size:13px;font-weight:700;color:var(--mid);margin-bottom:10px}
+.summary-row{display:flex;gap:8px;margin-bottom:6px;font-size:12.5px}
+.s-label{color:var(--light);min-width:110px}.s-val{color:var(--dark);font-weight:600}
+.capa-prompt-box{background:var(--dark);border-radius:12px;padding:18px;margin-bottom:14px}
+.capa-prompt-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.capa-prompt-heading span{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px}
+.capa-prompt-text{font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.75;white-space:pre-wrap}
+.btn-copy{padding:8px 16px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.15);border-radius:8px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-copy:hover{background:rgba(255,255,255,.18)}
+.btn-copy.copied{background:rgba(26,158,143,.3);border-color:var(--accent);color:#4dd9cb}
+.capa-result{display:none;animation:fadeUp .4s ease}
+.capa-result.visible{display:block}
+.capaEmptyState{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;text-align:center;gap:12px}
+@media(max-width:900px){.main-layout{grid-template-columns:1fr}.left-panel{position:static;height:auto}.right-panel{padding:20px 16px}}
+</style>
+</head>
+<body>
 
-    <a-scene>
-      <a-assets>
-        <img id="textura-terra" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Solarsystemscope_texture_8k_earth_daymap.jpg/1024px-Solarsystemscope_texture_8k_earth_daymap.jpg" crossorigin="anonymous">
-      </a-assets>
+<header>
+  <a href="#" class="logo">
+    <div class="logo-icon">🎨</div>
+    <span class="logo-text">Mestre <span>Visual</span></span>
+  </a>
+  <nav>
+    <a href="#" class="active">Gerador</a>
+    <a href="#">Galeria</a>
+    <a href="#">Tutoriais</a>
+  </nav>
+</header>
 
-      <a-sphere id="planeta" src="#textura-terra" position="0 1.5 -3" radius="1" controle-maos></a-sphere>
+<div class="main-layout">
+  <div class="left-panel">
+    <div class="panel-badge">✦ Gerador de Materiais</div>
+    <h1 class="panel-title">Crie materiais educacionais incríveis</h1>
+    <p class="panel-subtitle">Infográficos visuais prontos e prompts de capa de apostila.</p>
+    <div class="divider"></div>
 
-      <a-sky color="#222222"></a-sky>
-      <a-camera position="0 1.5 0"></a-camera>
-    </a-scene>
+    <div class="tab-switcher">
+      <button class="tab-btn active" onclick="switchTab('infografico',this)">🗂 Infográfico</button>
+      <button class="tab-btn" onclick="switchTab('capa',this)">📘 Capa de Apostila</button>
+    </div>
 
-    <script>
-      // Criando um componente customizado no A-Frame para ler os dados das mãos
-      AFRAME.registerComponent('controle-maos', {
-        init: function () {
-          const videoElement = document.getElementById('input_video');
-          const planeta = this.el; // Referência à nossa esfera 3D
+    <!-- TAB INFOGRÁFICO -->
+    <div class="tab-content active" id="tab-infografico">
+      <div class="form-group">
+        <label class="form-label"><span class="icon">📚</span>Disciplina</label>
+        <input class="form-input" id="disciplina" placeholder="Ex: Matemática, Biologia, Português..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">✨</span>Assunto / Tema</label>
+        <input class="form-input" id="assunto" placeholder="Ex: Volume da Esfera, Fotossíntese..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">👥</span>Público-alvo</label>
+        <select class="form-select" id="publico">
+          <option value="">Selecione o público</option>
+          <option value="Ensino fundamental I">Ensino fundamental I (6–10 anos)</option>
+          <option value="Ensino fundamental II">Ensino fundamental II (11–14 anos)</option>
+          <option value="Ensino médio">Ensino médio (15–17 anos)</option>
+          <option value="Ensino superior">Ensino superior</option>
+          <option value="Concursos">Concursos e vestibulares</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">📝</span>Conteúdo de referência <span class="optional-badge">opcional</span></label>
+        <textarea class="form-textarea" id="referencia" placeholder="Cole aqui conceitos-chave, fórmulas ou exemplos que o infográfico deve cobrir..."></textarea>
+      </div>
+      <button class="btn-generate" id="btnGerar" onclick="gerarInfografico()">
+        <div class="spin"></div>
+        <span class="btext">🚀 Gerar Infográfico</span>
+      </button>
+      <p class="timer-tag">⏱ Leva cerca de 30 segundos</p>
+    </div>
 
-          // Inicializa o MediaPipe Hands
-          const hands = new Hands({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-          }});
+    <!-- TAB CAPA -->
+    <div class="tab-content" id="tab-capa">
+      <div class="form-group">
+        <label class="form-label"><span class="icon">📚</span>Disciplina</label>
+        <input class="form-input" id="capa-disciplina" placeholder="Ex: Química, Física, Geografia..." oninput="atualizarPreviewCapa()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">🏷</span>Texto superior</label>
+        <input class="form-input" id="capa-topo" placeholder="Ex: Fichas Desenhadas, Apostila Visual..." oninput="atualizarPreviewCapa()" />
+        <p style="font-size:11px;color:var(--light);margin-top:5px">Aparece acima do título principal</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">💬</span>Frase inferior <span class="optional-badge">opcional</span></label>
+        <input class="form-input" id="capa-frase" placeholder="Ex: As moléculas ganharam vida!" oninput="atualizarPreviewCapa()" />
+        <p style="font-size:11px;color:var(--light);margin-top:5px">Se vazio, será gerada automaticamente</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span class="icon">🎨</span>Estilo visual</label>
+        <select class="form-select" id="capa-estilo">
+          <option value="hand-drawn doodle">Hand-drawn / Doodle</option>
+          <option value="flat design colorido">Flat design colorido</option>
+          <option value="cartoon educacional">Cartoon educacional</option>
+          <option value="minimalista moderno">Minimalista moderno</option>
+        </select>
+      </div>
+      <button class="btn-capa" id="btnGerarCapa" onclick="gerarPromptCapa()">
+        <div class="spin"></div>
+        <span class="btext">🎨 Gerar Prompt de Capa</span>
+      </button>
+      <p class="timer-tag">⏱ Rápido e fácil</p>
+    </div>
+  </div>
 
-          // Configurações de precisão do rastreamento
-          hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.6,
-            minTrackingConfidence: 0.6
-          });
+  <div class="right-panel">
+    <!-- INFOGRÁFICO PANEL -->
+    <div id="infografico-panel">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🎓</div>
+        <h2 class="empty-title">Pronto para criar?</h2>
+        <p class="empty-sub">Preencha os campos e clique em "Gerar Infográfico" para criar um material visual completo estilo apostila, pronto para imprimir ou compartilhar.</p>
+      </div>
+      <div class="infog-loading" id="infogLoading">
+        <div class="infog-spinner"></div>
+        <p>Gerando seu infográfico educacional...</p>
+      </div>
+      <div class="infog-result" id="infogResult">
+        <div class="infog-toolbar">
+          <h2 id="infogTitle">Infográfico</h2>
+          <div class="infog-actions">
+            <button class="btn-action" onclick="gerarInfografico()">🔄 Regenerar</button>
+            <button class="btn-action primary" onclick="baixarInfografico()">⬇️ Baixar HTML</button>
+          </div>
+        </div>
+        <div id="infogFrame"></div>
+      </div>
+    </div>
 
-          // O que acontece quando o MediaPipe detecta uma mão
-          hands.onResults((results) => {
-            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-              const landmarks = results.multiHandLandmarks[0];
+    <!-- CAPA PANEL -->
+    <div id="capa-panel" style="display:none">
+      <div class="cover-preview-wrap">
+        <div class="cover-preview">
+          <div class="cover-bg-grid"></div>
+          <div class="cover-inner">
+            <div class="cover-top-text" id="prevTopo">Fichas Desenhadas</div>
+            <div class="cover-icons-area" id="prevIcons">📐 🔬 🧬 🌍 📊 ⚗️ 🔭 🧪 📏 🧮 🌱 💡</div>
+            <div class="cover-main-title" id="prevDisciplina">DISCIPLINA</div>
+            <div class="cover-bottom-text" id="prevFrase">Aprenda de forma visual e divertida!</div>
+          </div>
+        </div>
+      </div>
+      <div class="capaEmptyState" id="capaEmptyState">
+        <div class="empty-icon" style="animation-delay:.2s">📘</div>
+        <h2 class="empty-title">Pré-visualização ao vivo</h2>
+        <p class="empty-sub">Preencha os campos e gere o prompt para criar a capa num gerador de imagens como Midjourney ou DALL-E.</p>
+      </div>
+      <div class="capa-result" id="capaResult">
+        <div class="summary-card">
+          <h4>📋 Resumo da Capa</h4>
+          <div class="summary-row"><span class="s-label">Disciplina:</span><span class="s-val" id="sumDisciplina">—</span></div>
+          <div class="summary-row"><span class="s-label">Texto superior:</span><span class="s-val" id="sumTopo">—</span></div>
+          <div class="summary-row"><span class="s-label">Frase inferior:</span><span class="s-val" id="sumFrase">—</span></div>
+          <div class="summary-row"><span class="s-label">Estilo:</span><span class="s-val" id="sumEstilo">—</span></div>
+        </div>
+        <div class="capa-prompt-box">
+          <div class="capa-prompt-heading">
+            <span>🖼 Prompt de Imagem</span>
+            <button class="btn-copy" id="btnCopyCapa" onclick="copiarTexto('capaPromptText','btnCopyCapa')">📋 Copiar</button>
+          </div>
+          <p class="capa-prompt-text" id="capaPromptText"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-              // Ponto 8 = Ponta do Indicador | Ponto 4 = Ponta do Polegar | Ponto 0 = Pulso
-              const pontaIndicador = landmarks[8];
-              const pontaPolegar = landmarks[4];
-              const pulso = landmarks[0];
+<script>
+// TAB SWITCHING
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-infografico').classList.toggle('active',tab==='infografico');
+  document.getElementById('tab-capa').classList.toggle('active',tab==='capa');
+  document.getElementById('infografico-panel').style.display=tab==='infografico'?'':'none';
+  document.getElementById('capa-panel').style.display=tab==='capa'?'':'none';
+}
 
-              // 1. CÁLCULO DE ESCALA (Distância Euclidiana para o movimento de pinça)
-              const dx = pontaIndicador.x - pontaPolegar.x;
-              const dy = pontaIndicador.y - pontaPolegar.y;
-              const distancia = Math.sqrt(dx * dx + dy * dy);
+// =============================================
+// INFOGRÁFICO GENERATOR
+// =============================================
+async function gerarInfografico(){
+  const disciplina=document.getElementById('disciplina').value.trim();
+  const assunto=document.getElementById('assunto').value.trim();
+  const publico=document.getElementById('publico').value;
+  const referencia=document.getElementById('referencia').value.trim();
+  if(!disciplina||!assunto){alert('Preencha a Disciplina e o Assunto.');return;}
 
-              // Multiplicamos por um fator para o zoom ficar visível e definimos um tamanho mínimo
-              const escala = Math.max(0.3, distancia * 4); 
-              planeta.setAttribute('scale', {x: escala, y: escala, z: escala});
+  const btn=document.getElementById('btnGerar');
+  btn.classList.add('loading');
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('infogResult').classList.remove('show');
+  document.getElementById('infogLoading').classList.add('show');
 
-              // 2. CÁLCULO DE ROTAÇÃO (Baseado no movimento do pulso na tela)
-              // O MediaPipe retorna o X de 0 a 1. Centralizamos subtraindo 0.5.
-              const rotacaoY = (pulso.x - 0.5) * 360; 
-              planeta.setAttribute('rotation', {x: 0, y: rotacaoY, z: 0});
-            }
-          });
-
-          // Liga a webcam e envia os frames para o MediaPipe processar
-          const camera = new Camera(videoElement, {
-            onFrame: async () => {
-              await hands.send({image: videoElement});
-            },
-            width: 640,
-            height: 480
-          });
-          camera.start();
-        }
-      });
-    </script>
-  </body>
-</html>
+  const system=`
