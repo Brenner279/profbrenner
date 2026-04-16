@@ -155,6 +155,29 @@
             box-shadow: 0 0 0 3px rgba(160, 196, 255, 0.2);
         }
 
+        .badge {
+            background-color: #e2e8f0;
+            color: #475569;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: normal;
+        }
+
+        .hint {
+            display: block;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        
+        .hint-center {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 12px;
+        }
+
         /* Caixa de Dica */
         .hint-box {
             background-color: #eff6ff;
@@ -277,17 +300,6 @@
             margin-top: 15px;
         }
 
-        .hint-text {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin-top: 6px;
-            display: block;
-            background-color: #f1f5f9;
-            padding: 8px;
-            border-radius: 6px;
-            border-left: 3px solid var(--primary-color);
-        }
-
         /* Divisão de colunas para inputs curtos */
         .row-group {
             display: flex;
@@ -367,19 +379,38 @@
         </div>
 
         <div id="tab-capa" class="tab-content">
-            <div class="header"><h2>Capa de Material</h2></div>
-            <div class="form-group">
-                <label>📚 Título</label>
-                <input type="text" id="capa-disciplina" value="Matemática Aplicada">
+            <div class="header">
+                <h2>Capa de Apostila</h2>
             </div>
+
             <div class="form-group">
-                <label>🎨 Estilo Visual</label>
+                <label>📚 Disciplina / Assunto</label>
+                <input type="text" id="capa-disciplina" placeholder="Ex: Química, Física, MMC..." value="MMC">
+            </div>
+
+            <div class="form-group">
+                <label>🏷️ Texto superior</label>
+                <input type="text" id="capa-top-text" placeholder="Ex: Fichas Desenhadas, Apostila Visual..." value="Fichas Desenhadas">
+                <span class="hint">Aparece acima do título principal</span>
+            </div>
+
+            <div class="form-group">
+                <label>💬 Frase inferior <span class="badge">opcional</span></label>
+                <input type="text" id="capa-bottom-text" placeholder="Ex: As moléculas ganharam vida!">
+                <span class="hint">Se vazio, será gerada automaticamente baseada no assunto</span>
+            </div>
+
+            <div class="form-group">
+                <label>🎨 Estilo visual</label>
                 <select id="capa-estilo">
                     <option value="Hand-drawn doodle" selected>Hand-drawn / Doodle</option>
                     <option value="3D Pixar style">3D Pixar Style</option>
+                    <option value="Minimalist geometric">Minimalista Geométrico</option>
                 </select>
             </div>
-            <button class="btn-gerar btn-capa" onclick="gerarPrompt('capa')">🎨 Gerar Capa</button>
+
+            <button class="btn-gerar btn-capa" onclick="gerarPrompt('capa')">🎨 Gerar Prompt de Capa</button>
+            <div class="hint-center">⏱️ Rápido e fácil</div>
         </div>
 
         <div id="tab-exercicios" class="tab-content">
@@ -504,10 +535,29 @@ DETALHES DO LAYOUT:
 - Sem erros matemáticos ou simbólicos.`;
         
         } else if (tipo === 'capa') {
-            const assunto = document.getElementById('capa-disciplina').value;
+            // Lógica restaurada exatamente como no arquivo original
+            const assunto = document.getElementById('capa-disciplina').value.trim() || '[Disciplina/Assunto]';
+            const topText = document.getElementById('capa-top-text').value.trim() || 'Apostila Visual';
+            let bottomText = document.getElementById('capa-bottom-text').value.trim();
             const estilo = document.getElementById('capa-estilo').value;
 
-            prompt = `Capa de apostila educacional brasileira. Título Central: "${assunto}" em tipografia 3D vibrante. Background: Estilo papel de caderno. Elementos: Ilustrações ao redor do título relacionadas ao assunto. Estilo artístico: ${estilo}. Alta resolução, cores profissionais.`;
+            if (!bottomText) {
+                bottomText = `${assunto} desenhada para entender`;
+            }
+
+            prompt = `TOP TEXT: "${topText}" in a handwritten brush script font style, placed at the top of the cover.
+
+MAIN TITLE: "${assunto}" in large, bold, inflated 3D colorful gradient typography with shine, glow and depth effects, placed centrally and prominently.
+
+BOTTOM TEXT: "${bottomText}" in a smaller elegant font at the bottom.
+
+BACKGROUND: Light notebook grid/squared paper texture.
+
+ILLUSTRATIONS: Scattered all around the title, hand-drawn colorful doodle illustrations of subject-specific educational icons and symbols related to ${assunto}. Every illustration must be directly related to ${assunto}. High level of detail, vibrant colors, playful but organized layout.
+
+STYLE: ${estilo} illustrations, colorful, educational, professional book cover quality. Rich composition (NOT minimalist). Subject-specific illustrations only - NO generic stick figures. No repeated elements, NO unrelated icons.
+
+The final result must look like a professional Brazilian educational material cover ("apostila" style), visually attractive, rich in details, and fully coherent with the subject ${assunto}.`;
         
         } else if (tipo === 'exercicios') {
             const disciplina = document.getElementById('ex-disciplina').value;
