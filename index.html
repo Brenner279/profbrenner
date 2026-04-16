@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Prompts Educacionais | Prof. Michel Brenner</title>
+    <title>Gerador de Prompts | Prof. Michel Brenner</title>
     <style>
         :root {
             --primary-color: #2b6cb0;
@@ -30,11 +30,53 @@
         body {
             background-color: var(--bg-color);
             display: flex;
-            justify-content: center;
-            padding: 40px 20px;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
             margin: 0;
             color: var(--text-main);
+            min-height: 100vh;
         }
+
+        /* --- NOVO: Estilos do Cabeçalho e Rodapé --- */
+        .app-header {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 40px;
+            max-width: 800px;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .app-footer {
+            margin-top: auto;
+            padding: 40px 20px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .app-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        /* ------------------------------------------- */
 
         .main-wrapper {
             display: flex;
@@ -42,13 +84,14 @@
             width: 100%;
             max-width: 1200px;
             align-items: flex-start;
+            flex: 1;
         }
 
         .panel {
             background-color: var(--panel-bg);
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
             flex: 1;
             width: 100%;
         }
@@ -113,7 +156,7 @@
             padding-bottom: 15px;
         }
 
-        .header h2 { margin: 0; font-size: 1.3rem; }
+        .header h2 { margin: 0; font-size: 1.3rem; color: var(--text-main); }
 
         .section-title {
             font-size: 0.85rem;
@@ -147,6 +190,7 @@
             outline: none;
             transition: all 0.3s ease;
             background-color: #f8fafc;
+            color: var(--text-main);
         }
 
         input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
@@ -178,7 +222,6 @@
             margin-top: 12px;
         }
 
-        /* Caixa de Dica */
         .hint-box {
             background-color: #eff6ff;
             border: 1px solid #bfdbfe;
@@ -270,6 +313,15 @@
             top: 40px;
         }
 
+        .result-panel h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
         #prompt-output {
             font-family: 'Courier New', Courier, monospace;
             white-space: pre-wrap;
@@ -300,7 +352,6 @@
             margin-top: 15px;
         }
 
-        /* Divisão de colunas para inputs curtos */
         .row-group {
             display: flex;
             gap: 15px;
@@ -315,10 +366,16 @@
             .mini-prompt-container { flex-direction: column; }
             .btn-mini-copiar { padding: 10px; }
             .row-group { flex-direction: column; gap: 0; }
+            .app-title { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
+
+<header class="app-header">
+    <h1 class="app-title">🚀 Assistente Criativo Pedagógico</h1>
+    <p class="app-subtitle">Crie prompts otimizados para gerar infográficos, capas de materiais e listas de exercícios com Inteligência Artificial em segundos.</p>
+</header>
 
 <div class="main-wrapper">
     <div class="panel">
@@ -484,6 +541,10 @@
     </div>
 </div>
 
+<footer class="app-footer">
+    <p>Desenvolvido para educadores inovadores. © 2026 | <a href="#" target="_blank">@prof_brenner</a></p>
+</footer>
+
 <script>
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -535,7 +596,6 @@ DETALHES DO LAYOUT:
 - Sem erros matemáticos ou simbólicos.`;
         
         } else if (tipo === 'capa') {
-            // Lógica restaurada exatamente como no arquivo original
             const assunto = document.getElementById('capa-disciplina').value.trim() || '[Disciplina/Assunto]';
             const topText = document.getElementById('capa-top-text').value.trim() || 'Apostila Visual';
             let bottomText = document.getElementById('capa-bottom-text').value.trim();
